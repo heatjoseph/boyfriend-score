@@ -1,60 +1,156 @@
-# 男友每日打分系统
+# 男友每日打分系统（Supabase 云端版）
 
-一个轻量网页：每天可按 5 个维度给男友评分（总分 100），支持历史记录、统计看板、数据导出。
+当前版本已升级为云端存储，支持跨设备同步，并实现角色权限：
 
-## 功能
+- 女友账号：可提交/修改/清空自己的评分数据
+- 你账号：仅可查看全部评分，不可写入
 
-- 每日评分（同一天重复提交会覆盖更新）
-- 历史记录表格
-- 平均分 / 最高分 / 最低分 / 记录天数
-- 导出 JSON 备份
-- 一键清空数据
+## 1. Supabase 初始化
 
-## 本地预览
+1. 创建 Supabase 项目（<https://supabase.com>）。
+2. 打开 SQL Editor，执行下面整段 SQL。
 
-直接双击 `index.html` 即可打开，或在终端运行：
+```sql
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  role text not null check (role in ('girlfriend', 'boyfriend'))
+);
+
+create table if not exists public.daily_scores (
+  id bigint generated always as identity primary key,
+  score_date date not null,
+  communication int not null check (communication between 0 and 20),
+  care int not null check (care between 0 and 20),
+  responsibility int not null check (responsibility between 0 and 20),
+  romance int not null check (romance between 0 and 20),
+  stability int not null check (stability between 0 and 20),
+  comment text default '',
+  total int not null check (total between 0 and 100),
+  created_by uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (score_date, created_by)
+);
+
+alter table public.profiles enable row level security;
+alter table public.daily_scores enable row level security;
+
+drop policy if exists "profiles_select_self" on public.profiles;
+create policy "profiles_select_self"
+on public.profiles
+for select
+to authenticated
+using (id = auth.uid());
+
+drop policy if exists "girlfriend_select_own_scores" on public.daily_scores;
+create policy "girlfriend_select_own_scores"
+on public.daily_scores
+for select
+to authenticated
+using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'girlfriend'
+  )
+  and created_by = auth.uid()
+);
+
+drop policy if exists "girlfriend_insert_own_scores" on public.daily_scores;
+create policy "girlfriend_insert_own_scores"
+on public.daily_scores
+for insert
+to authenticated
+with check (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'girlfriend'
+  )
+  and created_by = auth.uid()
+);
+
+drop policy if exists "girlfriend_update_own_scores" on public.daily_scores;
+create policy "girlfriend_update_own_scores"
+on public.daily_scores
+for update
+to authenticated
+using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'girlfriend'
+  )
+  and created_by = auth.uid()
+)
+with check (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'girlfriend'
+  )
+  and created_by = auth.uid()
+);
+
+drop policy if exists "girlfriend_delete_own_scores" on public.daily_scores;
+create policy "girlfriend_delete_own_scores"
+on public.daily_scores
+for delete
+to authenticated
+using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'girlfriend'
+  )
+  and created_by = auth.uid()
+);
+
+drop policy if exists "boyfriend_select_all_scores" on public.daily_scores;
+create policy "boyfriend_select_all_scores"
+on public.daily_scores
+for select
+to authenticated
+using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'boyfriend'
+  )
+);
+```
+
+## 2. 创建账号与角色
+
+1. 在 Supabase Console -> Authentication -> Users 中创建两个用户：
+   - 女友邮箱账号
+   - 你的邮箱账号
+2. 在 Table Editor -> `profiles` 表新增两行：
+   - `id = 女友用户UUID`, `role = girlfriend`
+   - `id = 你的用户UUID`, `role = boyfriend`
+
+## 3. 配置前端密钥
+
+打开 `script.js`，把下面两个占位符替换成你自己的值：
+
+```js
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+```
+
+值来源：Supabase Console -> Project Settings -> API。
+
+## 4. 本地运行
 
 ```bash
+cd "/Users/josephzhang/男友打分系统"
 python3 -m http.server 8080
 ```
 
-然后访问 `http://localhost:8080`。
+访问 <http://localhost:8080>。
 
-## 上线（推荐 Vercel）
+## 5. 部署到 Vercel
 
-### 方案 A：网页控制台（不用命令行）
+1. 将项目上传到 GitHub 仓库。
+2. 登录 <https://vercel.com> 并导入该仓库。
+3. 静态项目保持默认配置直接 Deploy。
+4. 访问 `https://xxx.vercel.app`，分别用两个账号登录验证权限。
 
-1. 打开 [https://vercel.com](https://vercel.com)，使用 GitHub 登录。
-2. 把本项目上传到一个 GitHub 仓库（可新建仓库）。
-3. 在 Vercel 里点 `Add New Project`，选择该仓库导入。
-4. 框架选 `Other`（或保持默认），Build 命令留空，Output 目录留空。
-5. 点击 Deploy，几分钟后得到可访问链接（如 `https://xxx.vercel.app`）。
+## 6. 验收检查
 
-### 方案 B：命令行
-
-```bash
-npm i -g vercel
-vercel login
-vercel
-vercel --prod
-```
-
-按提示选择当前目录即可。
-
-## 上线（备选 Netlify）
-
-1. 打开 [https://app.netlify.com/drop](https://app.netlify.com/drop)
-2. 把项目文件夹直接拖进去
-3. 几秒后拿到公开链接
-
-## 说明
-
-当前版本使用浏览器 `localStorage` 存数据，适合“一个设备长期记录”的场景。
-
-如果你希望：
-
-- 你女朋友手机打分、你手机也能同步看
-- 仅她可写，你可查看
-- 微信分享后多人访问也稳定
-
-下一步可以升级为“前端 + 云数据库（Supabase/Firebase）”版本。
+- 女友账号：可以保存、更新、清空自己的记录。
+- 你账号：可以查看统计和历史，提交按钮应禁用。
+- 两端不同设备登录后，看到同一份云端数据。

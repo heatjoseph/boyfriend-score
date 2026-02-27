@@ -14,7 +14,27 @@
       </header>
 
       <section class="card">
+        <h2>账号登录</h2>
+        <form id="authForm" class="auth-form">
+          <div class="row auth-row">
+            <label for="email">邮箱</label>
+            <input id="email" name="email" type="email" autocomplete="username" required />
+          </div>
+          <div class="row auth-row">
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn primary">登录</button>
+            <button type="button" id="logoutBtn" class="btn">退出登录</button>
+          </div>
+        </form>
+        <p id="authStatus" class="status">未登录</p>
+      </section>
+
+      <section class="card">
         <h2>今日评分</h2>
+        <p id="permissionHint" class="status warning">请先登录。女友账号可提交评分，你账号仅查看。</p>
         <form id="scoreForm">
           <div class="row">
             <label for="scoreDate">日期</label>
@@ -61,7 +81,7 @@
             <strong id="totalScore">50</strong>
           </div>
 
-          <button type="submit" class="btn primary">保存今日评分</button>
+          <button id="saveBtn" type="submit" class="btn primary">保存今日评分</button>
         </form>
       </section>
 
@@ -113,6 +133,7 @@
       </section>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./script.js"></script>
   </body>
 </html>

@@ -56,6 +56,22 @@ body {
   font-size: 18px;
 }
 
+.auth-form {
+  margin-bottom: 8px;
+}
+
+.auth-row {
+  grid-template-columns: 80px 1fr;
+}
+
+.auth-row input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
 .row {
   display: grid;
   grid-template-columns: 120px 1fr 40px;
@@ -102,6 +118,11 @@ body {
   cursor: pointer;
 }
 
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .btn.primary {
   background: var(--primary);
   border-color: var(--primary);
@@ -145,6 +166,17 @@ body {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.status {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.status.warning {
+  color: var(--danger);
 }
 
 .table-wrap {
