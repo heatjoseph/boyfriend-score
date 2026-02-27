@@ -290,11 +290,16 @@ async function init() {
     const password = String(authForm.elements.password.value || "");
     if (!email || !password) return;
     setStatus("登录中...");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setStatus(`登录失败：${error.message}`, true);
       return;
     }
+    if (!data?.session) {
+      setStatus("登录成功，但会话未建立。请检查 Supabase 的 Email Confirm 设置。", true);
+      return;
+    }
+    await handleSession(data.session);
     authForm.reset();
   });
 
