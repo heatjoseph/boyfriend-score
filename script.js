@@ -29,6 +29,14 @@ let currentUser = null;
 let currentRole = null;
 let recordsCache = [];
 
+// Always prevent native form submit (page reload), even if init exits early.
+authForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+});
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+});
+
 function getToday() {
   const now = new Date();
   const year = now.getFullYear();
