@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>男友每日打分系统</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <h1>男友每日打分系统</h1>
+        <p>每天 1 分钟，给今天的我一个客观评分。</p>
+      </header>
+
+      <section class="card">
+        <h2>今日评分</h2>
+        <form id="scoreForm">
+          <div class="row">
+            <label for="scoreDate">日期</label>
+            <input id="scoreDate" name="date" type="date" required />
+          </div>
+
+          <div class="row">
+            <label for="communication">沟通（0-20）</label>
+            <input id="communication" name="communication" type="range" min="0" max="20" value="10" />
+            <output id="communicationValue">10</output>
+          </div>
+
+          <div class="row">
+            <label for="care">体贴（0-20）</label>
+            <input id="care" name="care" type="range" min="0" max="20" value="10" />
+            <output id="careValue">10</output>
+          </div>
+
+          <div class="row">
+            <label for="responsibility">责任感（0-20）</label>
+            <input id="responsibility" name="responsibility" type="range" min="0" max="20" value="10" />
+            <output id="responsibilityValue">10</output>
+          </div>
+
+          <div class="row">
+            <label for="romance">浪漫（0-20）</label>
+            <input id="romance" name="romance" type="range" min="0" max="20" value="10" />
+            <output id="romanceValue">10</output>
+          </div>
+
+          <div class="row">
+            <label for="stability">情绪稳定（0-20）</label>
+            <input id="stability" name="stability" type="range" min="0" max="20" value="10" />
+            <output id="stabilityValue">10</output>
+          </div>
+
+          <div class="row">
+            <label for="comment">备注</label>
+            <textarea id="comment" name="comment" rows="3" placeholder="今天值得表扬或改进的点"></textarea>
+          </div>
+
+          <div class="row total-row">
+            <span>总分</span>
+            <strong id="totalScore">50</strong>
+          </div>
+
+          <button type="submit" class="btn primary">保存今日评分</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>统计看板</h2>
+        <div class="stats-grid">
+          <article class="stat">
+            <h3>平均分</h3>
+            <p id="avgScore">--</p>
+          </article>
+          <article class="stat">
+            <h3>最高分</h3>
+            <p id="bestScore">--</p>
+          </article>
+          <article class="stat">
+            <h3>最低分</h3>
+            <p id="worstScore">--</p>
+          </article>
+          <article class="stat">
+            <h3>记录天数</h3>
+            <p id="totalDays">0</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>历史记录</h2>
+        <div class="actions">
+          <button id="exportBtn" class="btn">导出 JSON</button>
+          <button id="clearBtn" class="btn danger">清空数据</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>总分</th>
+                <th>沟通</th>
+                <th>体贴</th>
+                <th>责任感</th>
+                <th>浪漫</th>
+                <th>情绪稳定</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
